@@ -1,0 +1,2 @@
+server:     task server
+shadowcljs: task cljs

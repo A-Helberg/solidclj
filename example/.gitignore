@@ -1,0 +1,14 @@
+/.cpcache
+/out
+/target
+/.nrepl-port
+/.lsp/
+.clj-kondo/.cache
+.clj-kondo/imports
+.idea/
+.DS_Store
+node_modules/
+resources/public/js/
+.shadow-cljs/
+bun.lock
+bun.lockb

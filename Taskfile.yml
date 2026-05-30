@@ -1,0 +1,14 @@
+version: '3'
+
+tasks:
+
+  bootstrap:
+    desc: Install toolchain and JS dependencies
+    cmds:
+      - ./bin/bootstrap.sh
+
+  example:
+    desc: Start the example app (server + shadow-cljs watch)
+    dir: example
+    cmds:
+      - overmind start

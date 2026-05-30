@@ -1,0 +1,16 @@
+.cpcache
+out
+target
+.nrepl-port
+.lsp/
+**/.clj-kondo/.cache
+**/.clj-kondo/imports
+
+.idea/
+.DS_Store
+node_modules/
+resources/public/js/
+.shadow-cljs/
+package-lock.json
+bun.lockb
+.rebel_readline_history

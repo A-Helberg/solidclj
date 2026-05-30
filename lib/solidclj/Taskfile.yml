@@ -1,0 +1,14 @@
+version: '3'
+
+tasks:
+
+  bootstrap:
+    desc: Install JS and Clojure dependencies
+    cmds:
+      - ./bin/bootstrap.sh
+
+  test:
+    desc: Run frontend.hiccup tests under happy-dom (node-test)
+    cmds:
+      - bunx shadow-cljs -A:cljs compile node-test
+      - node --conditions=browser out/node-tests.js

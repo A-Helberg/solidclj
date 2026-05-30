@@ -1,0 +1,18 @@
+version: '3'
+
+tasks:
+
+  dev:
+    desc: Start server + shadow-cljs watch together (via overmind)
+    cmds:
+      - overmind start
+
+  server:
+    desc: Start the Clojure server on :3000
+    cmds:
+      - clojure -X:run
+
+  cljs:
+    desc: Start shadow-cljs watch on :8080
+    cmds:
+      - bunx shadow-cljs -A:cljs watch app
