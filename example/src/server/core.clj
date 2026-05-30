@@ -14,6 +14,7 @@
 ;; ---------------------------------------------------------------------------
 
 (registry/register! #'api.clock/time-flow)
+(registry/register! #'api.clock/slow-time-flow)
 (registry/register! #'api.clock/echo)
 
 ;; ---------------------------------------------------------------------------

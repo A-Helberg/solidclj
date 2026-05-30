@@ -5,6 +5,7 @@
    ["recharts" :refer [LineChart Line XAxis YAxis CartesianGrid Tooltip Legend ResponsiveContainer]]
    [promesa.core :as p]
    [api.clock :as clock]
+   [solidrpc.call.solidjs :as solidrpc]
    [solidclj.react :as react]
    [solidclj.react.reagent :as react.reagent]
    [frontend.reagent-counter :as reagent-counter]))
@@ -109,9 +110,20 @@
 (defn clock-widget-h []
   (let [time (clock/time-flow)]
     (h [:div {:style "font-family: monospace; font-size: 1.4rem; margin: 1rem 0"}
-        (if (time)
-          [:span {:style "color: #2563eb"} (time)]
-          [:span {:style "color: #9ca3af"} "connecting…"])])))
+        (if ((:loading? time))
+          [:span {:style "color: #9ca3af"} "connecting…"]
+          [:span {:style "color: #2563eb"} (time)])])))
+
+;; ---------------------------------------------------------------------------
+;; Suspense demo — slow clock with loading fallback
+;; ---------------------------------------------------------------------------
+
+(defn slow-clock-widget []
+  (let [time (clock/slow-time-flow)]
+    [solidrpc/suspense time
+     [:span {:style "color: #9ca3af"} "waiting for slow clock…"]
+     (h [:span {:style "color: #2563eb; font-family: monospace; font-size: 1.4rem"}
+         (time)])]))
 
 ;; ---------------------------------------------------------------------------
 ;; Echo command — HTTP POST
@@ -229,6 +241,10 @@
    [:h2 {:style "font-size: 1rem; font-weight: 600; color: #6b7280; margin: 1.5rem 0 0.25rem"}
     "Live clock — rewritten with h macro (no manual fn wrappers)"]
    [clock-widget-h]
+
+   [:h2 {:style "font-size: 1rem; font-weight: 600; color: #6b7280; margin: 1.5rem 0 0.25rem"}
+    "Slow clock (suspense — 3s delay before first value)"]
+   [slow-clock-widget]
 
    [:h2 {:style "font-size: 1rem; font-weight: 600; color: #6b7280; margin: 1.5rem 0 0.25rem"}
     "Echo command (HTTP POST)"]

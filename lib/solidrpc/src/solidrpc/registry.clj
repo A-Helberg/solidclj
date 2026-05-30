@@ -3,7 +3,7 @@
 (defonce ^:private registry (atom {}))
 
 (defn register!
-  "Register a var for remote dispatch. Call this at startup for every ^:api fn."
+  "Register a var for remote dispatch."
   [v]
   {:pre [(var? v)]}
   (swap! registry assoc (str (symbol v)) v)
