@@ -29,3 +29,17 @@
   [msg]
   #?(:clj  {:echo msg :at (str (java.util.Date.))}
      :cljs (solidrpc/command `echo msg)))
+
+(defn scoreboard-flow
+  "Emits a map of player->score every second, incrementing one random player.
+   Demonstrates diff streaming: only the changed entry is sent after the first full value."
+  []
+  #?(:clj  (let [players ["Alice" "Bob" "Carol" "Dave" "Eve"]
+                 scores  (atom (into {} (map #(vector % (rand-int 50)) players)))]
+             (s/periodically
+              (long 1000)
+              (fn []
+                (let [p (rand-nth players)]
+                  (swap! scores update p + (+ 1 (rand-int 15)))
+                  @scores))))
+     :cljs (solidrpc/query `scoreboard-flow)))
