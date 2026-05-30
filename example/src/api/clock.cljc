@@ -1,6 +1,6 @@
 (ns api.clock
   (:require
-   [call :as call]
+   #?(:cljs [solidrpc.call :as solidrpc])
    #?(:clj [manifold.stream :as s])))
 
 (defn ^:api time-flow
@@ -9,11 +9,11 @@
    Client: an SSE-backed Reagent ratom via call/query."
   []
   #?(:clj  (s/periodically (long 1000)
-                            (fn [] (str (java.util.Date.))))
-     :cljs (call/query `time-flow)))
+                           (fn [] (str (java.util.Date.))))
+     :cljs (solidrpc/query `time-flow)))
 
 (defn ^:api echo
   "Simple command that echoes its argument back."
   [msg]
   #?(:clj  {:echo msg :at (str (java.util.Date.))}
-     :cljs (call/command `echo msg)))
+     :cljs (solidrpc/command `echo msg)))

@@ -1,4 +1,4 @@
-(ns transit
+(ns solidrpc.transit
   (:refer-clojure :exclude [read write])
   (:require [cognitect.transit :as t])
   #?(:clj (:import [java.io ByteArrayInputStream ByteArrayOutputStream])))
