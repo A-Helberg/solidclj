@@ -5,9 +5,12 @@
         metosin/reitit               {:mvn/version "0.9.1"}
         com.taoensso/timbre          {:mvn/version "6.6.2"}
         funcool/promesa              {:mvn/version "11.0.678"}
+        missionary/missionary        {:mvn/version "b.47"}
         reagent/reagent              {:mvn/version "1.2.0"}}
 
  :aliases
  {:cljs {:extra-deps {thheller/shadow-cljs {:mvn/version "2.28.17"}}}
+
+  :test {:extra-paths ["test"]}
 
   :run {:exec-fn server.core/run}}}

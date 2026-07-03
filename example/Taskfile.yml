@@ -16,3 +16,23 @@ tasks:
     desc: Start shadow-cljs watch on :8080
     cmds:
       - bunx shadow-cljs -A:cljs watch app
+
+  css:
+    desc: Tailwind watch — rebuilds resources/public/css/app.css
+    cmds:
+      - bunx tailwindcss -i tailwind.css -o resources/public/css/app.css --watch
+
+  css-build:
+    desc: One-shot Tailwind build
+    cmds:
+      - bunx tailwindcss -i tailwind.css -o resources/public/css/app.css
+
+  test:
+    desc: Render-smoke-test every guide page under happy-dom
+    cmds:
+      - bunx shadow-cljs -A:cljs:test compile node-test
+      - node --conditions=browser out/node-tests.js
+
+  caddy:
+    cmds:
+      - caddy run

@@ -1,0 +1,49 @@
+@import "tailwindcss";
+@import "highlight.js/styles/github-dark.css";
+@plugin "@tailwindcss/typography";
+
+@source "./src";
+@source "./resources/public/index.html";
+
+/* code panels bring their own background (bg-gray-950) */
+.hljs {
+  background: transparent;
+}
+
+/* ---------------------------------------------------------------------------
+ * DOM-update flashing (frontend.flash)
+ *
+ * Any element the MutationObserver sees change gets one of these two
+ * classes. Two identical animations exist so that back-to-back changes can
+ * restart the flash by swapping classes — no reflow hacks, no timers.
+ * ------------------------------------------------------------------------- */
+
+.flash-a {
+  animation: flash-a 400ms ease-out;
+}
+
+.flash-b {
+  animation: flash-b 400ms ease-out;
+}
+
+@keyframes flash-a {
+  0% {
+    outline: 2px solid #3b82f6;
+    outline-offset: 1px;
+  }
+  100% {
+    outline: 2px solid transparent;
+    outline-offset: 1px;
+  }
+}
+
+@keyframes flash-b {
+  0% {
+    outline: 2px solid #3b82f6;
+    outline-offset: 1px;
+  }
+  100% {
+    outline: 2px solid transparent;
+    outline-offset: 1px;
+  }
+}

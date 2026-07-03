@@ -1,2 +1,4 @@
 server:     task server
 shadowcljs: task cljs
+css:        task css
+caddy:      task caddy

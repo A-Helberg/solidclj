@@ -1,0 +1,72 @@
+(ns frontend.flash
+  "Chrome-inspector-style paint flashing: any element whose attributes,
+  text, or children just changed gets a brief blue outline.
+
+  A MutationObserver watches the whole page. Flashing works by toggling
+  between two identical CSS animations (`flash-a` / `flash-b`, see
+  tailwind.css) — swapping the class restarts the animation for
+  back-to-back changes without reflow tricks or timers. Mutations caused
+  by the flash classes themselves are filtered out, so the observer
+  never feeds back into itself.")
+
+(defonce enabled? (atom true))
+
+(def ^:private flash-tokens #{"flash-a" "flash-b"})
+
+(defn- flash! [el]
+  (when-let [cl (and el (.-classList el))]
+    (if (.contains cl "flash-a")
+      (do (.remove cl "flash-a") (.add cl "flash-b"))
+      (do (.remove cl "flash-b") (.add cl "flash-a")))))
+
+(defn- without-flash-tokens [class-str]
+  (->> (.split (or class-str "") #"\s+")
+       (remove #(or (= % "") (flash-tokens %)))
+       sort))
+
+(defn- flash-toggle-only?
+  "True when an attribute mutation is just us adding/removing the flash
+  classes — the class list is otherwise unchanged."
+  [m]
+  (and (= "class" (.-attributeName m))
+       (= (without-flash-tokens (.-oldValue m))
+          (without-flash-tokens (.getAttribute (.-target m) "class")))))
+
+(defn- element? [n]
+  (= 1 (.-nodeType n)))
+
+(defn- on-mutations [records _obs]
+  (when @enabled?
+    (let [els (js/Set.)]
+      (doseq [m (array-seq records)]
+        (case (.-type m)
+          "characterData"
+          (some->> (.. m -target -parentElement) (.add els))
+
+          "attributes"
+          (when-not (flash-toggle-only? m)
+            (.add els (.-target m)))
+
+          "childList"
+          (do (doseq [n (array-seq (.-addedNodes m))]
+                (if (element? n)
+                  (.add els n)
+                  (some->> (.-parentElement n) (.add els))))
+              (when (pos? (.. m -removedNodes -length))
+                (.add els (.-target m))))
+
+          nil))
+      (.forEach els (fn [el _ _] (flash! el))))))
+
+(defn install!
+  "Start observing `root` (default: document.body). Returns the observer."
+  ([] (install! js/document.body))
+  ([root]
+   (let [obs (js/MutationObserver. on-mutations)]
+     (.observe obs root
+               #js {:subtree           true
+                    :childList         true
+                    :attributes        true
+                    :attributeOldValue true
+                    :characterData     true})
+     obs)))
