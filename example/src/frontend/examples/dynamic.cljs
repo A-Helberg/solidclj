@@ -1,6 +1,6 @@
 (ns frontend.examples.dynamic
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce tag (s/atom "h2"))
 

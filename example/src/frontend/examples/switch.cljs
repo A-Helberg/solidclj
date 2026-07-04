@@ -1,6 +1,6 @@
 (ns frontend.examples.switch
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce status (s/atom :loading))
 

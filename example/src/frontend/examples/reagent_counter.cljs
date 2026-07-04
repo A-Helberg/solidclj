@@ -2,7 +2,7 @@
   (:require [reagent.core :as r]
             [solidclj.api :as s]
             [solidclj.react.reagent :as react.reagent]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce step (s/atom 1))
 

@@ -1,6 +1,6 @@
 (ns frontend.examples.show
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce online? (s/atom true))
 

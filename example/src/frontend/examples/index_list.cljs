@@ -1,6 +1,6 @@
 (ns frontend.examples.index-list
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce readings (s/atom [12 47 3]))
 

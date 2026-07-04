@@ -1,8 +1,7 @@
 (ns frontend.core
-  (:require
-   [solidclj.api :refer [render]]
-   [frontend.flash :as flash]
-   [frontend.app :as app]))
+  (:require [solidclj.api :refer [render]]
+            [frontend.flash :as flash]
+            [frontend.app :as app]))
 
 (defonce ^:private dispose* (atom nil))
 

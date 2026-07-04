@@ -1,6 +1,6 @@
 (ns frontend.examples.error-boundary
   (:require ["solid-js" :refer [createSignal]]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defn example []
   (let [[boom set-boom] (createSignal false)]

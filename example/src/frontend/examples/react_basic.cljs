@@ -2,7 +2,7 @@
   (:require ["react" :refer [createElement]]
             [solidclj.api :as s]
             [solidclj.react :as react]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce clicks (s/atom 0))
 

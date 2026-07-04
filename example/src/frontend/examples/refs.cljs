@@ -1,5 +1,5 @@
 (ns frontend.examples.refs
-  (:require [frontend.ui :as ui]))
+  (:require [solidclj.docs.ui :as ui]))
 
 (defn example []
   (let [input-el (atom nil)] ;; holds the DOM node, not app state

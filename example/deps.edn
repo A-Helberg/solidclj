@@ -1,5 +1,6 @@
 {:paths ["src" "resources"]
  :deps {solidjclj/solidclj           {:local/root "../lib/solidclj/"}
+        solidjclj/solidclj-docs      {:local/root "../lib/solidclj-docs/"}
         solidjclj/solidrpc           {:local/root "../lib/solidrpc/"}
         aleph/aleph                  {:mvn/version "0.9.0"}
         metosin/reitit               {:mvn/version "0.9.1"}

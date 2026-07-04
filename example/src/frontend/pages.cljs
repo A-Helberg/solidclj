@@ -3,7 +3,7 @@
   source is inlined at compile time with shadow.resource/inline — the
   code you read IS the code that runs, they cannot drift apart."
   (:require [shadow.resource :as rc]
-            [frontend.ui :as ui]
+            [solidclj.docs.ui :as ui]
             [frontend.examples.perf :as perf]
             [frontend.examples.hello :as hello]
             [frontend.examples.elements :as elements]
@@ -476,4 +476,58 @@
         "you leave (which is why the history resets)."]]
       :examples
       [{:source    (rc/inline "frontend/examples/missionary_tracked.cljs")
-        :component missionary-tracked/example}]}]}])
+        :component missionary-tracked/example}]}]}
+
+   {:title "Tooling"
+    :pages
+    [{:id    :neovim
+      :title "Neovim"
+      :prose
+      [:<>
+       [:p "Four tools cover the full workflow: "
+        [:strong "clojure-lsp"] " for static analysis, "
+        [:strong "nvim-treesitter"] " for syntax, "
+        [:strong "Conjure"] " for a live REPL, and "
+        [:strong "shadow-cljs watch"] " in a terminal for hot reload."]
+
+       [:h3 "clojure-lsp"]
+       [:p "Install via Mason (" [:code ":MasonInstall clojure-lsp"]
+        ") or your system package manager, then register it with "
+        "nvim-lspconfig:"]
+       [:pre [:code "(lspconfig.clojure_lsp.setup {})"]]
+       [:p "clojure-lsp reads " [:code "deps.edn"] " and resolves the "
+        "full classpath, including " [:code ":local/root"] " libs — "
+        "so jump-to-definition, completions, and rename all work "
+        "across lib source files without any extra config."]
+
+       [:h3 "Treesitter"]
+       [:pre [:code ":TSInstall clojure"]]
+       [:p "No further config needed."]
+
+       [:h3 "Conjure + shadow-cljs nREPL"]
+       [:p "Start the dev server first:"]
+       [:pre [:code "task dev"]]
+       [:p "shadow-cljs starts an nREPL server alongside the build watcher "
+        "and writes its port to " [:code ".shadow-cljs/nrepl.port"] ". "
+        "Conjure picks this up automatically when you open a "
+        [:code ".cljs"] " file."]
+       [:p "To evaluate into the running browser build you need a "
+        "ClojureScript REPL, not just a Clojure one. Tell Conjure "
+        "which shadow-cljs build to select on connect — add this to "
+        "your Neovim config:"]
+       [:pre [:code "vim.g[\"conjure#client#clojure#nrepl#shadow#select_build\"] = \"app\""]]
+       [:p "With that set, " [:code "<localleader>ee"] " evaluates the "
+        "form under the cursor into the live page, and "
+        [:code "<localleader>eb"] " evaluates the whole buffer. "
+        "Useful for resetting state or trying expressions against the "
+        "running app without a page reload."]
+
+       [:h3 "Hot reload"]
+       [:p "shadow-cljs recompiles and pushes updates to the browser on "
+        "every file save — no manual step. The "
+        [:code "^:dev/after-load"] " hook in "
+        [:code "src/frontend/core.cljs"] " re-mounts the app after "
+        "each reload: state held in " [:code "defonce"] " vars "
+        "survives edits, while a changed component body starts "
+        "fresh. Conjure eval and hot reload are complementary — "
+        "save for reload, eval for exploration."]]}]}])

@@ -1,6 +1,6 @@
 (ns frontend.examples.suspense
   (:require ["solid-js" :refer [createResource createSignal]]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defn- fetch-email
   "Stands in for a real request — resolves after 1.2s."

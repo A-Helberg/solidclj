@@ -2,7 +2,7 @@
   (:require ["recharts" :refer [LineChart Line XAxis YAxis Tooltip]]
             [solidclj.api :as s]
             [solidclj.react :as react]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce data
   (s/atom [{:day "Mon" :uv 400} {:day "Tue" :uv 300}

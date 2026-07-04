@@ -1,6 +1,6 @@
 (ns frontend.examples.for-list
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce todos   (s/atom [{:id 1 :text "buy milk"}
                           {:id 2 :text "walk dog"}]))

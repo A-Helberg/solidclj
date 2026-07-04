@@ -1,7 +1,7 @@
 (ns frontend.examples.h-macro
   (:require-macros [solidclj.hiccup-macros :refer [h]])
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce logged-in? (s/atom false))
 

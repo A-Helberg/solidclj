@@ -1,6 +1,6 @@
 (ns frontend.examples.thunks
   (:require ["solid-js" :refer [createSignal]]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defn example []
   (let [[n set-n] (createSignal 0)]

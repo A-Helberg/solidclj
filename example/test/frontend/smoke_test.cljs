@@ -4,7 +4,8 @@
   (:require [cljs.test :refer-macros [deftest is testing]]
             [frontend.test-setup :refer [fresh-root]]
             [solidclj.api :as s]
-            [frontend.app :as app]
+            [solidclj.docs :as docs]
+            [frontend.flash :as flash]
             [frontend.pages :as pages]))
 
 (deftest every-page-renders
@@ -12,7 +13,7 @@
           page            pages]
     (testing (name (:id page))
       (let [root    (fresh-root)
-            dispose (s/render [app/page-view page] root)]
+            dispose (s/render [docs/page-view page] root)]
         (try
           (is (pos? (.. root -innerHTML -length))
               (str (:id page) " should render non-empty HTML"))
@@ -23,7 +24,7 @@
 (deftest example-source-is-syntax-highlighted
   (let [page    (->> pages/sections (mapcat :pages) (some #(when (= :components (:id %)) %)))
         root    (fresh-root)
-        dispose (s/render [app/page-view page] root)]
+        dispose (s/render [docs/page-view page] root)]
     (try
       (is (.includes (.-innerHTML root) "hljs-")
           "code block should contain highlight.js token spans")
@@ -31,7 +32,7 @@
 
 (deftest app-shell-renders-sidebar-and-home
   (let [root    (fresh-root)
-        dispose (s/render [app/app] root)]
+        dispose (s/render [docs/app {:title "solidclj" :subtitle "guide" :sections pages/sections :sidebar-footer flash/toggle}] root)]
     (try
       (let [html (.-innerHTML root)]
         (is (.includes html "solidclj") "brand in sidebar")

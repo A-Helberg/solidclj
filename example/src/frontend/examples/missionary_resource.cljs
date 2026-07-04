@@ -2,7 +2,7 @@
   (:require-macros [solidclj.hiccup-macros :refer [h]])
   (:require [missionary.core :as m]
             [solidclj.missionary :as sm]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 ;; A task is a recipe for one async value; running it again re-executes
 ;; the whole recipe. This one pretends to fetch for 900 ms.

@@ -1,6 +1,6 @@
 (ns frontend.examples.satom
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 ;; s/atom is a real atom — swap!, reset!, add-watch all work — but
 ;; deref'ing it inside a reactive thunk also subscribes the thunk.

@@ -1,7 +1,7 @@
 (ns frontend.examples.js-components
   (:require ["solid-js" :refer [createSignal]]
             ["solid-js/h" :as h-module]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (def h (or (.-default h-module) h-module))
 

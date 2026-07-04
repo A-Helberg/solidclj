@@ -1,7 +1,7 @@
 (ns frontend.examples.satom-h
   (:require-macros [solidclj.hiccup-macros :refer [h]])
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce temp (s/atom 21))
 

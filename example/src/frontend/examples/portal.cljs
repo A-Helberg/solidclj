@@ -1,6 +1,6 @@
 (ns frontend.examples.portal
   (:require [solidclj.api :as s]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce open? (s/atom false))
 

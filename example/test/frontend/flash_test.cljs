@@ -1,5 +1,5 @@
 (ns frontend.flash-test
-  "Drives frontend.flash's mutation handler with hand-built records —
+  "Drives solidclj.docs.flash's mutation handler with hand-built records —
   regression tests for what gets blamed for a change."
   (:require [cljs.test :refer-macros [deftest is testing]]
             [frontend.test-setup]

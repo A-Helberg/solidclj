@@ -3,7 +3,7 @@
   (:require [missionary.core :as m]
             [solidclj.api :as s]
             [solidclj.missionary :as sm]
-            [frontend.ui :as ui]))
+            [solidclj.docs.ui :as ui]))
 
 (defonce mounted? (s/atom true))
 (defonce beats (s/atom 0))
