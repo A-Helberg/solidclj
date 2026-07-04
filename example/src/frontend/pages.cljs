@@ -26,7 +26,11 @@
             [frontend.examples.js-components :as js-components]
             [frontend.examples.react-basic :as react-basic]
             [frontend.examples.react-chart :as react-chart]
-            [frontend.examples.reagent-counter :as reagent-counter]))
+            [frontend.examples.reagent-counter :as reagent-counter]
+            [frontend.examples.missionary-hold :as missionary-hold]
+            [frontend.examples.missionary-resource :as missionary-resource]
+            [frontend.examples.missionary-spawn :as missionary-spawn]
+            [frontend.examples.missionary-tracked :as missionary-tracked]))
 
 (def sections
   [{:title "Introduction"
@@ -380,4 +384,96 @@
         "feed it from outside."]]
       :examples
       [{:source    (rc/inline "frontend/examples/reagent_counter.cljs")
-        :component reagent-counter/example}]}]}])
+        :component reagent-counter/example}]}]}
+
+   {:title "Missionary"
+    :pages
+    [{:id    :missionary-hold
+      :title "Flows & hold"
+      :prose
+      [:<>
+       [:p "Missionary is a functional effect system: a "
+        [:strong "flow"] " is a value describing a stream — building "
+        "one runs nothing. " [:code "sm/hold"] " bridges it into the "
+        "UI as a read-only reactive ref that derefs exactly like an "
+        [:code "s/atom"] ", so everything from the previous pages (bare "
+        "derefs under " [:code "h"] ", thunks, un-deref'd refs in "
+        "child slots) applies unchanged."]
+       [:p [:code "hold"] " is lazy and refcounted, like a Reagent "
+        "reaction: the flow starts on the first reactive deref and is "
+        "cancelled when the last subscriber unmounts. Try it — visit "
+        "another page and come back, and the counter restarts from "
+        "zero even though the hold is a " [:code "defonce"] ". A hold "
+        "nobody renders costs nothing."]
+       [:p "One naming rule keeps the two libraries composable: "
+        [:code "solidclj.missionary"] " never reuses a "
+        [:code "missionary.core"] " name — " [:code "m/watch"]
+        " still means atom → flow, so flow → ref needed a different "
+        "word, and " [:em "hold"] " is FRP's."]]
+      :examples
+      [{:source    (rc/inline "frontend/examples/missionary_hold.cljs")
+        :component missionary-hold/example}]}
+
+     {:id    :missionary-resource
+      :title "Tasks & suspense"
+      :prose
+      [:<>
+       [:p "A missionary " [:strong "task"] " is a recipe for one "
+        "asynchronous value. " [:code "sm/resource"] " runs it and "
+        "returns a reactive ref built on Solid's "
+        [:code "createResource"] " — so a deref while the task is in "
+        "flight suspends to the nearest " [:code "[:suspense]"]
+        " fallback, and " [:code "sm/reload!"] " cancels the current "
+        "run and re-executes the recipe."]
+       [:p "Prefer branching by hand? " [:code "(sm/pending? r)"]
+        " and " [:code "(sm/error r)"] " are reactive and never "
+        "suspend. A failed resource re-throws its error on deref, "
+        "which is what " [:code "[:error-boundary]"] " is for. Note "
+        "that resources are eager — the fetch starts when the "
+        "component body runs, so create them inside components, not "
+        "at the top level."]]
+      :examples
+      [{:source    (rc/inline "frontend/examples/missionary_resource.cljs")
+        :component missionary-resource/example}]}
+
+     {:id    :missionary-spawn
+      :title "Effects — spawn!"
+      :prose
+      [:<>
+       [:p "Not every task produces a value for the DOM. "
+        [:code "sm/spawn!"] " runs a task purely for its effects and "
+        "ties it to the component's lifetime: mounting starts it, "
+        "unmounting cancels it. It deliberately takes a task, not a "
+        "flow — missionary already knows how to turn one into the "
+        "other (" [:code "m/reduce"] " below), and the bridge stays "
+        "one primitive."]
+       [:p "Toggle the heart: while mounted, the loop beats twice a "
+        "second into an s/atom; unmount and the count freezes — the "
+        "task was cancelled, not orphaned. Remounting spawns a fresh "
+        "run. Calling " [:code "spawn!"] " outside a component throws "
+        "in dev builds: an effect nobody can cancel is a leak."]]
+      :examples
+      [{:source    (rc/inline "frontend/examples/missionary_spawn.cljs")
+        :component missionary-spawn/example}]}
+
+     {:id    :missionary-tracked
+      :title "Solid → missionary"
+      :prose
+      [:<>
+       [:p "The bridge runs both ways. For a single atom, missionary "
+        "already has the operator: s/atoms are watchable, so "
+        [:code "(m/watch my-atom)"] " gives a live flow of its values "
+        "with no adapter. For a whole " [:em "computation"] ", "
+        [:code "sm/tracked"] " runs a thunk in a Solid tracking scope "
+        "and emits every re-run — any s/atom deref'd inside re-fires "
+        "it, deduplicated with " [:code "="] "."]
+       [:p "From there the missionary toolbox applies: below, "
+        [:code "m/latest"] " derives Fahrenheit and "
+        [:code "m/reductions"] " accumulates a history — something a "
+        "ref can't remember on its own — and " [:code "hold"] " brings "
+        "each result back into hiccup. The whole chain is lazy end to "
+        "end: it spins up when this page renders and tears down when "
+        "you leave (which is why the history resets)."]]
+      :examples
+      [{:source    (rc/inline "frontend/examples/missionary_tracked.cljs")
+        :component missionary-tracked/example}]}]}])
