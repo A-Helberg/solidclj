@@ -100,7 +100,12 @@
         "re-runs when a signal read inside it changes."]
        [:p "Solid's own primitives work directly: " [:code "createSignal"]
         " returns a getter/setter pair, and a getter placed in a child slot "
-        "is live on its own."]]
+        "is live on its own."]
+       [:p "Watch the flashes as you increment: the count paragraph only "
+        "updates its text, and the even/odd thunk swaps in a fresh "
+        [:code "<p>"] " because it returns a new element each run. The "
+        "button never flashes — the component function ran once, and "
+        "nothing outside a thunk is ever touched again."]]
       :examples
       [{:source    (rc/inline "frontend/examples/thunks.cljs")
         :component thunks/example}]}

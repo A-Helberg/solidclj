@@ -37,7 +37,8 @@
 
 (defn- on-mutations [records _obs]
   (when @enabled?
-    (let [els (js/Set.)]
+    (let [els    (js/Set.)
+          gained (js/Set.)] ;; containers that had nodes added this batch
       (doseq [m (array-seq records)]
         (case (.-type m)
           "characterData"
@@ -48,14 +49,24 @@
             (.add els (.-target m)))
 
           "childList"
-          (do (doseq [n (array-seq (.-addedNodes m))]
-                (if (element? n)
-                  (.add els n)
-                  (some->> (.-parentElement n) (.add els))))
-              (when (pos? (.. m -removedNodes -length))
-                (.add els (.-target m))))
+          (when (pos? (.. m -addedNodes -length))
+            (.add gained (.-target m))
+            (doseq [n (array-seq (.-addedNodes m))]
+              (if (element? n)
+                (.add els n)
+                (some->> (.-parentElement n) (.add els)))))
 
           nil))
+      ;; Removals: when a child was swapped (removed + added, possibly in
+      ;; separate records of the same batch), the inserted node already
+      ;; carries the flash — blaming the container would wrongly outline
+      ;; every sibling too. Flash the container only for PURE removals,
+      ;; where the vacated spot is all there is to point at.
+      (doseq [m (array-seq records)]
+        (when (and (= "childList" (.-type m))
+                   (pos? (.. m -removedNodes -length))
+                   (not (.has gained (.-target m))))
+          (.add els (.-target m))))
       (.forEach els (fn [el _ _] (flash! el))))))
 
 (defn install!
