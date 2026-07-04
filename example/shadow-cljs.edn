@@ -6,7 +6,8 @@
         :asset-path "/js"
         :modules    {:app {:init-fn frontend.core/init}}
         :devtools   {:watch-dir "resources/public"
-                     :proxy-url "http://localhost:3000"}}
+                     :proxy-url "http://localhost:3000"}
+        :release    {:asset-path "js"}}
 
   :node-test {:target    :node-test
               :output-to "out/node-tests.js"

@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jdx/mise-action@v2
+
+      - name: Install JS dependencies
+        working-directory: example
+        run: bun install
+
+      - name: Build CSS
+        working-directory: example
+        run: bunx tailwindcss -i tailwind.css -o resources/public/css/app.css
+
+      - name: Build ClojureScript
+        working-directory: example
+        run: bunx shadow-cljs -A:cljs release app
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: example/resources/public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
