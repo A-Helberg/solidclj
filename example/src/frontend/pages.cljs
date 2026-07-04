@@ -124,22 +124,38 @@
         "it. " [:code "(fn [] @my-atom)"] " is a live view of the atom. It is "
         "the " [:em "only"] " atom the renderer knows about — plain "
         [:code "cljs.core/atom"] "s are ignored (with a dev-time warning)."]
-       [:p "You don't have to write the thunks yourself: under the "
-        [:code "h"] " macro a bare " [:code "@temp"] " reads as "
-        [:code "(deref temp)"] " — a list form — and gets wrapped into its "
-        "own thunk. The second example is the first one rewritten that way; "
-        "note how the temperature line now updates a single text node "
-        "instead of swapping the paragraph."]
        [:p "Resetting to an " [:code "="] " value notifies watchers (normal "
         "atom semantics) but does not re-run reactive scopes, so no-op updates "
         "are free. One difference from Reagent: the component body is not a "
         "reactive scope here, so a bare " [:code "@a"] " at the top level of a "
-        "component (outside " [:code "h"] ") is a one-shot snapshot."]]
+        "component is a one-shot snapshot — the deref must run inside a "
+        "thunk. Writing those thunks by hand gets old; the next page "
+        "introduces the macro that writes them for you."]]
       :examples
-      [{:title     "Explicit thunks"
-        :source    (rc/inline "frontend/examples/satom.cljs")
-        :component satom/example}
-       {:title     "Bare derefs with the h macro"
+      [{:source    (rc/inline "frontend/examples/satom.cljs")
+        :component satom/example}]}
+
+     {:id    :h-macro
+      :title "The h macro"
+      :prose
+      [:<>
+       [:p "The " [:code "h"] " macro walks a hiccup literal at compile "
+        "time and wraps list-form expressions in child positions — like the "
+        [:code "(if …)"] " below — into reactive thunks for you. Explicit "
+        [:code "(fn [] …)"] " forms are left alone, so you can mix both "
+        "styles and keep fine-grained control where you want it."]
+       [:p "A bare " [:code "@temp"] " reads as " [:code "(deref temp)"]
+        " — also a list form — so derefs are wrapped too, each into its own "
+        "thunk. The second example is the previous page's thermometer with "
+        "the thunks gone: note how the temperature line now updates a "
+        "single text node instead of swapping the paragraph, while the "
+        [:code "(if …)"] " is wrapped as a whole — the deref inside it "
+        "feeds a comparison, and the re-runnable unit is the branch."]]
+      :examples
+      [{:title     "Auto-wrapped control flow"
+        :source    (rc/inline "frontend/examples/h_macro.cljs")
+        :component h-macro/example}
+       {:title     "Bare derefs"
         :source    (rc/inline "frontend/examples/satom_h.cljs")
         :component satom-h/example}]}
 
@@ -160,24 +176,7 @@
         "reactive reads."]]
       :examples
       [{:source    (rc/inline "frontend/examples/atom_props.cljs")
-        :component atom-props/example}]}
-
-     {:id    :h-macro
-      :title "The h macro"
-      :prose
-      [:<>
-       [:p "Writing " [:code "(fn [] …)"] " around every dynamic expression "
-        "gets old. The " [:code "h"] " macro walks a hiccup literal at compile "
-        "time and wraps list-forms in child positions — like the "
-        [:code "(if …)"] " below — into reactive thunks for you. That "
-        "includes bare derefs (" [:code "@a"] " is " [:code "(deref a)"]
-        "), in children and in prop values (except " [:code ":on*"] " / "
-        [:code ":ref"] ", whose values are callbacks)."]
-       [:p "Explicit " [:code "(fn [] …)"] " forms are left alone, so you can "
-        "mix both styles and keep fine-grained control where you want it."]]
-      :examples
-      [{:source    (rc/inline "frontend/examples/h_macro.cljs")
-        :component h-macro/example}]}]}
+        :component atom-props/example}]}]}
 
    {:title "Control flow"
     :pages
