@@ -1,7 +1,8 @@
 (ns frontend.examples.index-list
-  (:require [frontend.ui :as ui]))
+  (:require [solidclj.api :as s]
+            [frontend.ui :as ui]))
 
-(defonce readings (atom [12 47 3]))
+(defonce readings (s/atom [12 47 3]))
 
 (defn example []
   [:div {:class "space-y-3"}

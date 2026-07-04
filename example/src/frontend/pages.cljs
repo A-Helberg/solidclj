@@ -9,7 +9,7 @@
             [frontend.examples.elements :as elements]
             [frontend.examples.thunks :as thunks]
             [frontend.examples.satom :as satom]
-            [frontend.examples.atoms :as atoms]
+            [frontend.examples.satom-h :as satom-h]
             [frontend.examples.atom-props :as atom-props]
             [frontend.examples.h-macro :as h-macro]
             [frontend.examples.show :as show]
@@ -23,7 +23,10 @@
             [frontend.examples.portal :as portal]
             [frontend.examples.suspense :as suspense]
             [frontend.examples.error-boundary :as error-boundary]
-            [frontend.examples.js-components :as js-components]))
+            [frontend.examples.js-components :as js-components]
+            [frontend.examples.react-basic :as react-basic]
+            [frontend.examples.react-chart :as react-chart]
+            [frontend.examples.reagent-counter :as reagent-counter]))
 
 (def sections
   [{:title "Introduction"
@@ -118,39 +121,43 @@
         [:code "swap!"] ", " [:code "reset!"] ", " [:code "add-watch"]
         " and validators all behave exactly like " [:code "cljs.core/atom"]
         ") that " [:strong "also"] " subscribes any reactive scope that derefs "
-        "it. " [:code "(fn [] @my-atom)"] " is a live view of the atom."]
+        "it. " [:code "(fn [] @my-atom)"] " is a live view of the atom. It is "
+        "the " [:em "only"] " atom the renderer knows about — plain "
+        [:code "cljs.core/atom"] "s are ignored (with a dev-time warning)."]
+       [:p "You don't have to write the thunks yourself: under the "
+        [:code "h"] " macro a bare " [:code "@temp"] " reads as "
+        [:code "(deref temp)"] " — a list form — and gets wrapped into its "
+        "own thunk. The second example is the first one rewritten that way; "
+        "note how the temperature line now updates a single text node "
+        "instead of swapping the paragraph."]
        [:p "Resetting to an " [:code "="] " value notifies watchers (normal "
         "atom semantics) but does not re-run reactive scopes, so no-op updates "
         "are free. One difference from Reagent: the component body is not a "
         "reactive scope here, so a bare " [:code "@a"] " at the top level of a "
-        "component is a one-shot snapshot — deref inside thunks."]]
+        "component (outside " [:code "h"] ") is a one-shot snapshot."]]
       :examples
-      [{:source    (rc/inline "frontend/examples/satom.cljs")
-        :component satom/example}]}
-
-     {:id    :atoms
-      :title "Plain atoms in hiccup"
-      :prose
-      [:<>
-       [:p "Even a plain " [:code "cljs.core/atom"] " (or anything IDeref + "
-        "IWatchable) renders live when passed " [:em "un-deref'd"] " into a "
-        "child slot — the walker bridges it to a Solid signal and tears the "
-        "watch down when the surrounding scope disposes."]
-       [:p [:code "@atom"] " in hiccup is just a value: a snapshot taken when "
-        "the component ran. The example renders both so you can watch one "
-        "move and the other stand still."]]
-      :examples
-      [{:source    (rc/inline "frontend/examples/atoms.cljs")
-        :component atoms/example}]}
+      [{:title     "Explicit thunks"
+        :source    (rc/inline "frontend/examples/satom.cljs")
+        :component satom/example}
+       {:title     "Bare derefs with the h macro"
+        :source    (rc/inline "frontend/examples/satom_h.cljs")
+        :component satom-h/example}]}
 
      {:id    :atom-props
       :title "Atoms in props"
       :prose
       [:<>
-       [:p "Atoms are live in prop position too: "
-        [:code "[:input {:value my-atom}]"] " keeps the input in sync with "
-        "the atom. This works for any prop, and for values inside "
-        [:code ":style"] " and " [:code ":class"] " maps."]]
+       [:p "Why can't " [:code "{:value @text}"] " just work on its own? "
+        "Because " [:code "@text"] " evaluates while your component body "
+        "runs — the renderer receives the string, with no way to know an "
+        "atom was involved. Under " [:code "h"] " the deref is moved into "
+        "an accessor at compile time (" [:code "{:value (fn [] @text)}"]
+        "), which SolidJS wires to the DOM property."]
+       [:p "Alternatively, pass the s/atom itself un-deref'd — "
+        [:code "[:input {:value text}]"] " — and the walker bridges it. "
+        "Handler props (" [:code ":on*"] ", " [:code ":ref"] ") are never "
+        "rewritten by " [:code "h"] "; their values are callbacks, not "
+        "reactive reads."]]
       :examples
       [{:source    (rc/inline "frontend/examples/atom_props.cljs")
         :component atom-props/example}]}
@@ -162,7 +169,10 @@
        [:p "Writing " [:code "(fn [] …)"] " around every dynamic expression "
         "gets old. The " [:code "h"] " macro walks a hiccup literal at compile "
         "time and wraps list-forms in child positions — like the "
-        [:code "(if …)"] " below — into reactive thunks for you."]
+        [:code "(if …)"] " below — into reactive thunks for you. That "
+        "includes bare derefs (" [:code "@a"] " is " [:code "(deref a)"]
+        "), in children and in prop values (except " [:code ":on*"] " / "
+        [:code ":ref"] ", whose values are callbacks)."]
        [:p "Explicit " [:code "(fn [] …)"] " forms are left alone, so you can "
         "mix both styles and keep fine-grained control where you want it."]]
       :examples
@@ -177,8 +187,8 @@
       [:<>
        [:p [:code "[:show {:when … :fallback …}]"] " wraps Solid's "
         [:code "<Show>"] ": children render while " [:code ":when"] " is "
-        "truthy, the fallback otherwise. " [:code ":when"] " accepts an atom, "
-        "a signal getter, or a plain value."]]
+        "truthy, the fallback otherwise. " [:code ":when"] " accepts an "
+        "s/atom, a signal getter, or a plain value."]]
       :examples
       [{:source    (rc/inline "frontend/examples/show.cljs")
         :component show/example}]}
@@ -200,7 +210,7 @@
       :prose
       [:<>
        [:p [:code "[:dynamic {:component …}]"] " renders a component chosen "
-        "at runtime — a tag string, a component fn, or an atom holding "
+        "at runtime — a tag string, a component fn, or an s/atom holding "
         "either. When the atom changes, the element is swapped while its "
         "children stay put."]]
       :examples
@@ -328,4 +338,47 @@
         "API."]]
       :examples
       [{:source    (rc/inline "frontend/examples/js_components.cljs")
-        :component js-components/example}]}]}])
+        :component js-components/example}]}]}
+
+   {:title "React interop"
+    :pages
+    [{:id    :react-components
+      :title "React components"
+      :prose
+      [:<>
+       [:p [:code "[react/component Comp props & children]"] " mounts a real "
+        "React root inside the Solid tree. Props: static values are captured "
+        "at mount; s/atoms are watched and re-render the root on every "
+        "change; functions pass through as-is (event handlers, render "
+        "props). The root unmounts when the surrounding Solid scope "
+        "disposes."]
+       [:p "Children are React elements built with " [:code "react/el"]
+        " — a thin " [:code "React.createElement"] " wrapper that takes a "
+        "CLJS props map — so component libraries like recharts compose "
+        "naturally. Note the flashing when the chart updates: React "
+        "re-renders its whole root, exactly the behaviour the home page "
+        "compares against."]]
+      :examples
+      [{:title     "A React component with an s/atom prop"
+        :source    (rc/inline "frontend/examples/react_basic.cljs")
+        :component react-basic/example}
+       {:title     "recharts — React children via react/el"
+        :source    (rc/inline "frontend/examples/react_chart.cljs")
+        :component react-chart/example}]}
+
+     {:id    :reagent
+      :title "Reagent components"
+      :prose
+      [:<>
+       [:p [:code "react.reagent/component"] " does the same for Reagent: "
+        "the component renders through Reagent's own pipeline, so its "
+        "internal " [:code "r/atom"] " state and re-rendering work exactly "
+        "as in a Reagent app."]
+       [:p "Props crossing the bridge follow the same rule as everywhere "
+        "else: s/atoms are watched, plain atoms (including "
+        [:code "r/atom"] "s used " [:em "as props"] ") are not — keep "
+        "Reagent state inside the Reagent component and use s/atoms to "
+        "feed it from outside."]]
+      :examples
+      [{:source    (rc/inline "frontend/examples/reagent_counter.cljs")
+        :component reagent-counter/example}]}]}])

@@ -1,7 +1,8 @@
 (ns frontend.examples.dynamic
-  (:require [frontend.ui :as ui]))
+  (:require [solidclj.api :as s]
+            [frontend.ui :as ui]))
 
-(defonce tag (atom "h2"))
+(defonce tag (s/atom "h2"))
 
 (defn example []
   [:div {:class "space-y-3"}

@@ -6,6 +6,7 @@
   React DevTools' 'highlight updates' visualises)."
   (:require ["react" :refer [createElement]]
             ["solid-js" :refer [onCleanup]]
+            [solidclj.api :as s]
             [solidclj.react :as react]))
 
 (def size 50)
@@ -14,8 +15,8 @@
   ["#3b82f6" "#22c55e" "#eab308" "#ef4444" "#a855f7" "#e5e7eb"])
 
 (defonce state
-  (atom {:cells (vec (repeat (* size size) "#e5e7eb"))
-         :tick  0}))
+  (s/atom {:cells (vec (repeat (* size size) "#e5e7eb"))
+           :tick  0}))
 
 (defn- tick!
   "Recolor one random dot; the whole grid re-renders."

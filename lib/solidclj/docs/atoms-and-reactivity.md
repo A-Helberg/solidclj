@@ -1,53 +1,80 @@
 # Atoms and reactivity in solidclj
 
-SolidJS does not re-run component functions on state change. Reactivity requires either passing atoms **underef'd** into hiccup slots, or using `s/?` inside thunks.
+SolidJS does not re-run component functions on state change. Reactive state
+lives in **`s/atom`** (`solidclj.api/atom`, implemented in `solidclj.satom`):
+a real Clojure atom — `swap!`, `reset!`, `add-watch`, validators all behave
+exactly like `cljs.core/atom` — whose deref *also* subscribes the Solid
+tracking scope it runs in.
 
-## Two patterns
+Plain `cljs.core/atom`s are **not** special. The renderer ignores them (dev
+builds warn), and they never trigger updates. Use them for non-reactive
+mutable holders — DOM refs, test scaffolding — and `s/atom` for anything the
+UI should react to. Custom reference types can opt in by implementing
+`solidclj.satom/IReactiveAtom` (plus `IDeref` + `IWatchable`).
 
-**1. Underef'd in a hiccup slot** — the walker bridges the atom to a Solid signal automatically:
+## Three patterns
 
-```clojure
-[:div my-atom]                        ; child — re-renders on change
-[:input {:value my-atom}]             ; prop
-[:for {:each my-atom} render-fn]      ; list
-[:dynamic {:component my-atom}]       ; component switching
-[:show {:when my-atom} …]             ; nil/non-nil toggle only — see below
-```
-
-**2. `s/?` inside a `(fn [] …)` thunk** — use when you need the atom's value in Clojure logic:
+**1. Deref inside a `(fn [] …)` thunk** — the thunk re-runs when the atom changes:
 
 ```clojure
 (:require [solidclj.api :as s])
 
-(fn []
-  (let [page (get pages (:page (s/? router/current-route)) not-found)]
-    [page]))
+(defonce temp (s/atom 21))
+
+(fn [] [:p "it is " @temp "°C"])
 ```
 
-`s/?` registers a Solid signal read. The thunk re-runs whenever the atom changes.
+**2. Bare deref under the `h` macro** — `@temp` reads as `(deref temp)`, a
+list form, so `h` wraps it in its own thunk. This works in child slots *and*
+prop values (except `:on*`/`:ref`, which are callbacks):
+
+```clojure
+(h [:p "it is " @temp "°C"])       ; text node updates in place
+(h [:input {:value @temp}])        ; live prop
+```
+
+**3. Underef'd in a hiccup slot** — the walker bridges the s/atom to a Solid
+signal automatically:
+
+```clojure
+[:div my-satom]                        ; child — updates on change
+[:input {:value my-satom}]             ; prop
+[:for {:each my-satom} render-fn]      ; list
+[:dynamic {:component my-satom}]       ; component switching
+[:show {:when my-satom} …]             ; condition
+```
+
+`s/?` still exists for missionary flows (`(s/? some-flow)` → getter fn) and
+also accepts an s/atom, where it is equivalent to a deref.
 
 ## Pitfalls
 
-**`@atom` inside a thunk is not reactive.** `@` captures the value at the moment the thunk first runs — a snapshot. The thunk is never triggered again when the atom changes, so the UI stays frozen on that initial value:
+**`@atom` outside any thunk is a snapshot.** Component bodies are not
+tracking scopes (unlike Reagent, the component fn runs once), so a bare
+deref at the top level of a component captures the value at mount:
+
 ```clojure
-(fn [] [:div @my-atom])       ; wrong — frozen at first render
-(fn [] [:div (s/? my-atom)])  ; right — updates on every change
+(defn c []
+  [:div @temp])          ; frozen at mount — deref ran in the component body
+
+(defn c []
+  [:div (fn [] @temp)])  ; live — deref runs inside the thunk
+
+(defn c []
+  (h [:div @temp]))      ; live — h moves the deref into a thunk for you
 ```
 
-**`(:key atom)` reads off the atom object, not its value** — always nil:
-```clojure
-(:page router/current-route)      ; wrong — nil
-(:page (s/? router/current-route)) ; right
-```
-
-**`[:show {:when atom}]` only reacts to nil↔truthy changes.** If the atom changes from one truthy value to another (e.g. two different route maps), Show does not re-run its children. Use `s/?` in a plain thunk for value-dispatch.
+**Plain atoms don't update anything.** `[:div my-plain-atom]` renders
+nothing and warns in dev; `(fn [] @my-plain-atom)` runs once and never
+re-runs. Reach for `s/atom`.
 
 ## Quick reference
 
 ```
-my-atom              underef'd in hiccup slot → walker bridges, live
-@my-atom             snapshot — captures value once, never updates
-(s/? my-atom)        reactive read inside (fn [] …) thunks
-(s/? some-flow)      missionary flow → returns getter fn
-(fn [] …)            reactive thunk — use s/? inside for atom reads
+(fn [] @my-satom)     live — deref subscribes the thunk
+(h [:p @my-satom])    live — h auto-wraps derefs (children and props)
+my-satom              underef'd in a hiccup slot → walker bridges, live
+@my-satom             outside a thunk: snapshot, captured once
+(s/? some-flow)       missionary flow → returns getter fn
+plain (atom …)        ignored by the renderer (dev warning)
 ```

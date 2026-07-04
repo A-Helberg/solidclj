@@ -7,9 +7,10 @@
   tailwind.css) — swapping the class restarts the animation for
   back-to-back changes without reflow tricks or timers. Mutations caused
   by the flash classes themselves are filtered out, so the observer
-  never feeds back into itself.")
+  never feeds back into itself."
+  (:require [solidclj.api :as s]))
 
-(defonce enabled? (atom true))
+(defonce enabled? (s/atom true))
 
 (def ^:private flash-tokens #{"flash-a" "flash-b"})
 

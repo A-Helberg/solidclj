@@ -1,9 +1,10 @@
 (ns frontend.examples.for-list
-  (:require [frontend.ui :as ui]))
+  (:require [solidclj.api :as s]
+            [frontend.ui :as ui]))
 
-(defonce todos   (atom [{:id 1 :text "buy milk"}
-                        {:id 2 :text "walk dog"}]))
-(defonce next-id (atom 2))
+(defonce todos   (s/atom [{:id 1 :text "buy milk"}
+                          {:id 2 :text "walk dog"}]))
+(defonce next-id (s/atom 2))
 
 (defn example []
   [:div {:class "space-y-3"}

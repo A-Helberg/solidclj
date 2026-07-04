@@ -21,6 +21,18 @@
     (set! js/CustomEvent      (.-CustomEvent w))
     (set! js/DocumentFragment (.-DocumentFragment w))
     (set! js/MutationObserver (.-MutationObserver w))
+    ;; recharts measures its container via ResizeObserver; stub it if
+    ;; happy-dom doesn't provide one.
+    (when-not (exists? js/ResizeObserver)
+      (set! js/ResizeObserver
+            (if-let [ro (.-ResizeObserver w)]
+              ro
+              (fn [_cb]
+                (this-as this
+                  (set! (.-observe this) (fn [_el]))
+                  (set! (.-unobserve this) (fn [_el]))
+                  (set! (.-disconnect this) (fn []))
+                  this)))))
     (if-let [raf (.-requestAnimationFrame w)]
       (set! js/requestAnimationFrame raf)
       (set! js/requestAnimationFrame (fn [cb] (js/setTimeout cb 16))))
